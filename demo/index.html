@@ -42,9 +42,12 @@
             const data = await fetch('../src/default-data.json').then((res) => res.json())
             const themeObject = await fetch('themes/light.json').then((res) => res.json())
             const theme = { theme_name: 'light', theme_object: themeObject }
+            // The built-in token only works on studio.ironflock.com. To see tiles locally, open
+            // /demo/?token=<a Mapbox token that allows localhost>, e.g. studio's development token.
+            const accessToken = new URLSearchParams(location.search).get('token') ?? undefined
             render(
                 html`
-                    <${tag} .theme="${theme}" .inputData=${data}>
+                    <${tag} .theme="${theme}" .inputData=${data} .accessToken=${accessToken}>
                         web component is not registered. Make sure to use the tag with the correct version
                         string from the package.json
                     </${tag}>
@@ -73,8 +76,7 @@
                 'dataseries.1.data.12.value',
                 'dataseries.1.data.13.value',
                 'dataseries.1.data.14.value',
-                'dataseries.1.data.15.value',
-                'settings.title'
+                'dataseries.1.data.15.value'
             ]
             const inter = setInterval(() => {
                 const randomizedObj = randomizeObjectValues(data, keyPathsToRandomize)

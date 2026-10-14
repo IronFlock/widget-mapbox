@@ -30,11 +30,11 @@ export type MapStyle =
  */
 export type ShowLegend = boolean;
 /**
- * When enabled, the map automatically pans and zooms to keep all data points in view as they update. Disable for fixed-view maps where users control the viewport.
+ * When enabled, the map pans and zooms after every data update to keep all displayed points in view. When disabled, the map fits the data once and then keeps the view the user chooses.
  */
 export type AutoFollow = boolean;
 /**
- * Display name for this map layer shown in legends and tooltips. Should identify what entities or data this layer represents.
+ * Display name for this map layer, shown in the legend. When pivot splits the series, each pivot value appears as '<pivot value> - <label>'.
  */
 export type SeriesLabel = string;
 /**
@@ -42,7 +42,7 @@ export type SeriesLabel = string;
  */
 export type LayerType = "circle" | "symbol" | "heatmap" | "line";
 /**
- * Limit displayed data to the N most recent points per pivot group. Useful for showing only current positions without historical trail. Leave empty to show all data.
+ * Limit displayed data to the N most recent points per pivot group (rows arrive oldest first). Use 1 to show only each asset's current position. Leave empty to show all data.
  */
 export type LatestValues = number;
 /**
@@ -54,19 +54,19 @@ export type Blur = number;
  */
 export type Opacity = number;
 /**
- * Font size in pixels for label text on circle markers.
+ * Font size in pixels of the value labels drawn on the circles. Set it to show the labels; leave it empty for none.
  */
 export type TextSize = number;
 /**
- * Font size in pixels for label text on symbol markers.
+ * Font size in pixels of the value label shown below each icon. Defaults to 14.
  */
 export type TextSize1 = number;
 /**
- * Icon identifier from available icons: 'marker' for location pin, 'car-front'/'car-top' for vehicle tracking. See Maki icon set at https://labs.mapbox.com/maki-icons/ for more options.
+ * Icon drawn at each point: 'marker' for a location pin, 'car-front' or 'car-top' for vehicles. Defaults to 'car-front'. Icons are drawn in the layer color and stay visible when they overlap.
  */
 export type IconName = "marker" | "car-front" | "car-top";
 /**
- * Scale multiplier for the icon (1 = original size, 2 = double size, 0.5 = half size).
+ * Scale factor for the icon: 1 is 24 px, 2 doubles it, 0.5 halves it.
  */
 export type IconSize = number;
 /**
@@ -78,7 +78,7 @@ export type Intensity = number;
  */
 export type Opacity1 = number;
 /**
- * Base radius in pixels for each point's heat contribution. Combined with data value to determine actual heat spread. Larger radius = more blending.
+ * Base radius in pixels of each point's heat (default 30). Points with higher values spread up to twice as far.
  */
 export type RadiusBaseSize = number;
 /**
@@ -86,15 +86,15 @@ export type RadiusBaseSize = number;
  */
 export type LineWidth = number;
 /**
- * Icon displayed at the current position (end of line): 'marker' for generic location, 'car-front'/'car-top' for vehicles.
+ * Icon drawn at the newest position of the track: 'marker' for a location pin, 'car-front' or 'car-top' for vehicles. Leave empty for no icon.
  */
 export type IconName1 = "marker" | "car-front" | "car-top";
 /**
- * Scale multiplier for the position icon (1 = original size).
+ * Scale factor for the position icon: 1 is 24 px.
  */
 export type IconSize1 = number;
 /**
- * The east-west coordinate in decimal degrees (-180 to 180). Example: -122.4194 for San Francisco.
+ * The east-west coordinate in decimal degrees (-180 to 180). Example: -122.4194 for San Francisco. Rows without valid coordinates, or at exactly 0/0 (a GPS receiver without a fix), are skipped.
  */
 export type Longitude = number;
 /**
@@ -102,11 +102,11 @@ export type Longitude = number;
  */
 export type Latitude = number;
 /**
- * Optional elevation/altitude value in meters. Can be used for 3D visualization or displayed in tooltips.
+ * Optional altitude in meters. Accepted, but not shown on the map.
  */
 export type Altitude = number;
 /**
- * Numeric value associated with this location. Used for heatmap intensity, marker sizing, or tooltip display.
+ * Optional numeric value for this location. Circles grow with it, heatmaps weight by it, and circle and symbol layers can show it as a label. Points without a value are still drawn.
  */
 export type DataPointValue = number;
 /**
@@ -114,7 +114,7 @@ export type DataPointValue = number;
  */
 export type SplitDataBy = string;
 /**
- * Array of geographic data points. Each point must have latitude and longitude coordinates, with optional altitude, value, and pivot for grouping.
+ * Array of geographic data points. Each point needs longitude and latitude; altitude, value and pivot are optional. Rows without valid coordinates are skipped.
  */
 export type MapData = {
   lon?: Longitude;
@@ -153,7 +153,7 @@ export interface MapConfiguration {
   [k: string]: unknown;
 }
 /**
- * Primary color for this layer's markers or fill. Used as default when data-driven coloring isn't configured.
+ * Color of this layer's circles, icons and lines. When pivot splits the series, the first pivot value (or the rows without a pivot value) gets this color, and the other values get distinct colors from a fixed palette that avoids it; each value keeps its color while others come and go. Leave empty for an automatic color. Heatmaps ignore it and use a fixed blue-to-red scale.
  */
 export interface LayerBaseColor {
   [k: string]: unknown;
@@ -169,7 +169,7 @@ export interface CircleLayerConfiguration {
   [k: string]: unknown;
 }
 /**
- * Color of label text displayed on or near the circle markers.
+ * Color of the value labels drawn on the circles (shown only when Text Size is set). Defaults to black.
  */
 export interface TextColor {
   [k: string]: unknown;
@@ -185,7 +185,7 @@ export interface SymbolLayerConfiguration {
   [k: string]: unknown;
 }
 /**
- * Color of label text displayed near the symbol icons.
+ * Color of the value label shown below each icon. Defaults to black.
  */
 export interface TextColor1 {
   [k: string]: unknown;

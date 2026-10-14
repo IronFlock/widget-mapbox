@@ -2,12 +2,12 @@
     "title": "Map Configuration",
     "description": "A Mapbox-powered geospatial visualization widget for displaying location-based data on interactive maps. Use this widget for GPS tracking, asset locations, geographic heatmaps, route visualization, or any data with latitude/longitude coordinates. Supports multiple layer types including circles (points), symbols (icons), heatmaps (density), and lines (tracks/routes). Features auto-follow mode to keep markers in view, multiple map styles, and pivot-based auto-generation of layers from data columns. Ideal for fleet management, IoT device monitoring, field service tracking, and geographic data analysis.",
     "aiSelection": {
-        "dataShape": "Points carrying coordinates: dataseries[].data[] entries with lon and lat, optionally alt and a numeric value, rendered as circles, icons, a density heatmap or connected lines. A pivot column produces one layer per distinct value.",
+        "dataShape": "Points carrying coordinates: dataseries[].data[] entries with lon and lat, optionally alt and a numeric value, rendered as circles, icons, a density heatmap or connected lines. Positions alone are enough; value only sizes circles, weights the heatmap and labels markers. A pivot column produces one layer per distinct value.",
         "useWhen": [
             "Position on the earth is the point — vehicle and asset locations, site maps, field service, GPS traces.",
             "A route or track should be drawn by connecting points in order (dataseries[].type: 'line').",
             "Density across an area should be shaded (dataseries[].type: 'heatmap').",
-            "The view should keep following the latest position (follow: true)."
+            "The view should keep every current marker or track in view as data arrives (follow: true); with latestValues: 1 it follows each asset's newest position."
         ],
         "notFor": [
             "Coordinates that are only incidental, where the real question is a measured value over time — use widget-linechart.",
@@ -57,7 +57,7 @@
         },
         "follow": {
             "title": "Auto Follow",
-            "description": "When enabled, the map automatically pans and zooms to keep all data points in view as they update. Disable for fixed-view maps where users control the viewport.",
+            "description": "When enabled, the map pans and zooms after every data update to keep all displayed points in view. When disabled, the map fits the data once and then keeps the view the user chooses.",
             "type": "boolean",
             "dataDrivenDisabled": true,
             "order": 5
@@ -73,7 +73,7 @@
                 "properties": {
                     "label": {
                         "title": "Series Label",
-                        "description": "Display name for this map layer shown in legends and tooltips. Should identify what entities or data this layer represents.",
+                        "description": "Display name for this map layer, shown in the legend. When pivot splits the series, each pivot value appears as '<pivot value> - <label>'.",
                         "type": "string",
                         "required": true,
                         "order": 1
@@ -89,14 +89,14 @@
                     },
                     "color": {
                         "title": "Layer Base Color",
-                        "description": "Primary color for this layer's markers or fill. Used as default when data-driven coloring isn't configured.",
+                        "description": "Color of this layer's circles, icons and lines. When pivot splits the series, the first pivot value (or the rows without a pivot value) gets this color, and the other values get distinct colors from a fixed palette that avoids it; each value keeps its color while others come and go. Leave empty for an automatic color. Heatmaps ignore it and use a fixed blue-to-red scale.",
                         "type": "color",
                         "color": true,
                         "order": 3
                     },
                     "latestValues": {
                         "title": "Latest Values",
-                        "description": "Limit displayed data to the N most recent points per pivot group. Useful for showing only current positions without historical trail. Leave empty to show all data.",
+                        "description": "Limit displayed data to the N most recent points per pivot group (rows arrive oldest first). Use 1 to show only each asset's current position. Leave empty to show all data.",
                         "type": "number",
                         "dataDrivenDisabled": true,
                         "order": 4
@@ -131,14 +131,14 @@
                             },
                             "text-color": {
                                 "title": "Text Color",
-                                "description": "Color of label text displayed on or near the circle markers.",
+                                "description": "Color of the value labels drawn on the circles (shown only when Text Size is set). Defaults to black.",
                                 "type": "color",
                                 "color": true,
                                 "order": 3
                             },
                             "text-size": {
                                 "title": "Text Size",
-                                "description": "Font size in pixels for label text on circle markers.",
+                                "description": "Font size in pixels of the value labels drawn on the circles. Set it to show the labels; leave it empty for none.",
                                 "type": "number",
                                 "min": 1,
                                 "order": 4
@@ -157,28 +157,28 @@
                         "properties": {
                             "text-color": {
                                 "title": "Text Color",
-                                "description": "Color of label text displayed near the symbol icons.",
+                                "description": "Color of the value label shown below each icon. Defaults to black.",
                                 "type": "color",
                                 "color": true,
                                 "order": 1
                             },
                             "text-size": {
                                 "title": "Text Size",
-                                "description": "Font size in pixels for label text on symbol markers.",
+                                "description": "Font size in pixels of the value label shown below each icon. Defaults to 14.",
                                 "type": "number",
                                 "min": 1,
                                 "order": 2
                             },
                             "icon-image": {
                                 "title": "Icon Name",
-                                "description": "Icon identifier from available icons: 'marker' for location pin, 'car-front'/'car-top' for vehicle tracking. See Maki icon set at https://labs.mapbox.com/maki-icons/ for more options.",
+                                "description": "Icon drawn at each point: 'marker' for a location pin, 'car-front' or 'car-top' for vehicles. Defaults to 'car-front'. Icons are drawn in the layer color and stay visible when they overlap.",
                                 "type": "string",
                                 "enum": ["marker", "car-front", "car-top"],
                                 "order": 3
                             },
                             "icon-size": {
                                 "title": "Icon size",
-                                "description": "Scale multiplier for the icon (1 = original size, 2 = double size, 0.5 = half size).",
+                                "description": "Scale factor for the icon: 1 is 24 px, 2 doubles it, 0.5 halves it.",
                                 "type": "number",
                                 "min": 0,
                                 "order": 4
@@ -212,7 +212,7 @@
                             },
                             "heatmap-radius": {
                                 "title": "Radius Base Size",
-                                "description": "Base radius in pixels for each point's heat contribution. Combined with data value to determine actual heat spread. Larger radius = more blending.",
+                                "description": "Base radius in pixels of each point's heat (default 30). Points with higher values spread up to twice as far.",
                                 "type": "number",
                                 "min": 0,
                                 "order": 3
@@ -238,14 +238,14 @@
                             },
                             "icon-image": {
                                 "title": "Icon Name",
-                                "description": "Icon displayed at the current position (end of line): 'marker' for generic location, 'car-front'/'car-top' for vehicles.",
+                                "description": "Icon drawn at the newest position of the track: 'marker' for a location pin, 'car-front' or 'car-top' for vehicles. Leave empty for no icon.",
                                 "type": "string",
                                 "enum": ["marker", "car-front", "car-top"],
                                 "order": 3
                             },
                             "icon-size": {
                                 "title": "Icon size",
-                                "description": "Scale multiplier for the position icon (1 = original size).",
+                                "description": "Scale factor for the position icon: 1 is 24 px.",
                                 "type": "number",
                                 "min": 0,
                                 "order": 4
@@ -254,7 +254,7 @@
                     },
                     "data": {
                         "title": "Map data",
-                        "description": "Array of geographic data points. Each point must have latitude and longitude coordinates, with optional altitude, value, and pivot for grouping.",
+                        "description": "Array of geographic data points. Each point needs longitude and latitude; altitude, value and pivot are optional. Rows without valid coordinates are skipped.",
                         "type": "array",
                         "order": 6,
                         "items": {
@@ -262,7 +262,7 @@
                             "properties": {
                                 "lon": {
                                     "title": "Longitude",
-                                    "description": "The east-west coordinate in decimal degrees (-180 to 180). Example: -122.4194 for San Francisco.",
+                                    "description": "The east-west coordinate in decimal degrees (-180 to 180). Example: -122.4194 for San Francisco. Rows without valid coordinates, or at exactly 0/0 (a GPS receiver without a fix), are skipped.",
                                     "type": "number",
                                     "required": true,
                                     "order": 1
@@ -276,13 +276,13 @@
                                 },
                                 "alt": {
                                     "title": "Altitude",
-                                    "description": "Optional elevation/altitude value in meters. Can be used for 3D visualization or displayed in tooltips.",
+                                    "description": "Optional altitude in meters. Accepted, but not shown on the map.",
                                     "type": "number",
                                     "order": 3
                                 },
                                 "value": {
                                     "title": "Data point value",
-                                    "description": "Numeric value associated with this location. Used for heatmap intensity, marker sizing, or tooltip display.",
+                                    "description": "Optional numeric value for this location. Circles grow with it, heatmaps weight by it, and circle and symbol layers can show it as a label. Points without a value are still drawn.",
                                     "type": "number",
                                     "order": 4
                                 },

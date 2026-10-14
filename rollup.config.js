@@ -4,7 +4,7 @@ import typescript from '@rollup/plugin-typescript'
 import commonjs from '@rollup/plugin-commonjs'
 import babel from '@rollup/plugin-babel'
 import { string } from 'rollup-plugin-string'
-import { readFileSync, cpSync } from 'fs'
+import { readFileSync, cpSync, mkdirSync } from 'fs'
 const npmPackage = JSON.parse(readFileSync('./package.json'))
 
 export default {
@@ -26,17 +26,19 @@ export default {
             versionplaceholder: npmPackage.version,
             preventAssignment: true
         }),
-        string({ include: [/\.css(\?.*)?$/] }),
+        // CSS and the marker icons are inlined as strings
+        string({ include: [/\.css(\?.*)?$/, /\.svg$/] }),
         typescript({ sourceMap: true }),
         nodeResolve(),
         commonjs({}),
         babel({ babelHelpers: 'bundled' }),
-        // Ships the marker icons next to the bundle. Plain cpSync rather than
-        // rollup-plugin-copy, whose globby -> braces chain has no patched release.
+        // The emitted dist/src/widget-mapbox.d.ts imports './definition-schema.js', but tsc never
+        // copies a hand-maintained .d.ts into outDir, so ship the generated schema types beside it.
         {
-            name: 'copy-icons',
+            name: 'copy-schema-types',
             writeBundle() {
-                cpSync('icons', 'dist/icons', { recursive: true })
+                mkdirSync('dist/src', { recursive: true })
+                cpSync('src/definition-schema.d.ts', 'dist/src/definition-schema.d.ts')
             }
         }
     ]
