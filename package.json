@@ -71,14 +71,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/RecordEvolution/widget-mapbox.git"
+        "url": "git+https://github.com/IronFlock/widget-mapbox.git"
     },
     "keywords": [
         "widget",
         "mapbox"
     ],
     "bugs": {
-        "url": "https://github.com/RecordEvolution/widget-mapbox/issues"
+        "url": "https://github.com/IronFlock/widget-mapbox/issues"
     },
-    "homepage": "https://github.com/RecordEvolution/widget-mapbox#readme"
+    "homepage": "https://github.com/IronFlock/widget-mapbox#readme"
 }

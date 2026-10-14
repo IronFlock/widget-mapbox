@@ -35,7 +35,7 @@ jobs:
 
       # No .npmrc, no NPM_TOKEN. npm detects the OIDC environment and
       # authenticates against the trusted publisher configured for this
-      # package (RecordEvolution/widget-mapbox :: build-publish.yml).
+      # package (IronFlock/widget-mapbox :: build-publish.yml).
       - name: Publish to npm
         run: npm publish --access public
 
