@@ -1,5 +1,5 @@
 {
-    "name": "@record-evolution/widget-mapbox",
+    "name": "@ironflock/widget-mapbox",
     "description": "REWidget widget-mapbox",
     "license": "MIT",
     "author": "widget-mapbox",
@@ -22,8 +22,8 @@
         "start": "concurrently -k -r \"npm run watch\" \"wds\"",
         "build": "rollup -c rollup.config.js",
         "watch": "rollup -w -c rollup.config.js",
-        "link": "npm link && cd ../RESWARM/frontend && npm link @record-evolution/widget-mapbox",
-        "unlink": "npm unlink --global && cd ../RESWARM/frontend && npm unlink @record-evolution/widget-mapbox && npm i @record-evolution/widget-mapbox",
+        "link": "npm link && cd ../RESWARM/frontend && npm link @ironflock/widget-mapbox",
+        "unlink": "npm unlink --global && cd ../RESWARM/frontend && npm unlink @ironflock/widget-mapbox && npm i @ironflock/widget-mapbox",
         "types": "cat src/definition-schema.json | json2ts > src/definition-schema.d.ts",
         "cors": "gcloud storage buckets update gs://reswarm-images --cors-file=src/cors-config.json",
         "preversion": "sh scripts/release-preflight.sh",

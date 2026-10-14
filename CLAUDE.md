@@ -17,7 +17,7 @@ There is no test runner and no `lint` / `format` script in `package.json` (the R
 
 ## Architecture
 
-This repo produces a single LitElement web component published as `@record-evolution/widget-mapbox`, consumed by the IronFlock/RESWARM dashboard platform.
+This repo produces a single LitElement web component published as `@ironflock/widget-mapbox`, consumed by the IronFlock/RESWARM dashboard platform.
 
 ### Versioned custom element tag
 

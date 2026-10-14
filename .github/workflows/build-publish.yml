@@ -37,7 +37,17 @@ jobs:
       # authenticates against the trusted publisher configured for this
       # package (IronFlock/widget-mapbox :: build-publish.yml).
       - name: Publish to npm
-        run: npm publish --access public
+        # Skips a version that is already on npm: the first @ironflock release of
+        # each widget was published by hand (npm only accepts a trusted publisher
+        # for an existing package), and its tag still runs this job.
+        run: |
+          name=$(node -p "require('./package.json').name")
+          version=$(node -p "require('./package.json').version")
+          if [ "$(npm view "$name@$version" version 2>/dev/null)" = "$version" ]; then
+            echo "$name@$version is already on npm, skipping publish"
+          else
+            npm publish --access public
+          fi
 
       - name: Get the new version
         id: get_version
