@@ -39,12 +39,12 @@ The widget exposes two reactive `@property({ type: Object })` inputs:
 
 - `mapboxgl.accessToken` is hardcoded in the constructor.
 - `mapbox-gl/dist/mapbox-gl.css` is imported as a string (Rollup `rollup-plugin-string` matches `\.css$`) and injected via `unsafeCSS` inside the component's `static styles`, so styles stay scoped to the shadow root.
-- `icons/` (car-front, car-top, marker SVGs) is copied to `dist/icons` by `rollup-plugin-copy` and loaded as map images for the `symbol` layer. Icon color variants are generated at runtime by recoloring SVGs.
+- `icons/` (car-front, car-top, marker SVGs) is copied to `dist/icons` by a small inline `copy-icons` plugin (`fs.cpSync` in `writeBundle`) and loaded as map images for the `symbol` layer. Icon color variants are generated at runtime by recoloring SVGs.
 - A `ResizeObserver` on the map container debounces `map.resize()` + `fitBounds()` (300ms).
 
 ### Build pipeline
 
-Single Rollup config (`rollup.config.js`): `replace` (version) -> `string` (CSS as string) -> `typescript` -> `nodeResolve` -> `commonjs` -> `babel` (bundled helpers) -> `copy` (icons). Output is a single ESM bundle; `package.json` `main` points to `dist/widget-mapbox.js`, `types` to `dist/src/widget-mapbox.d.ts`.
+Single Rollup config (`rollup.config.js`): `replace` (version) -> `string` (CSS as string) -> `typescript` -> `nodeResolve` -> `commonjs` -> `babel` (bundled helpers) -> `copy-icons`. Output is a single ESM bundle; `package.json` `main` points to `dist/widget-mapbox.js`, `types` to `dist/src/widget-mapbox.d.ts`.
 
 ### Release flow
 

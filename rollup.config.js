@@ -4,9 +4,8 @@ import typescript from '@rollup/plugin-typescript'
 import commonjs from '@rollup/plugin-commonjs'
 import babel from '@rollup/plugin-babel'
 import { string } from 'rollup-plugin-string'
-import { readFileSync } from 'fs'
+import { readFileSync, cpSync } from 'fs'
 const npmPackage = JSON.parse(readFileSync('./package.json'))
-import copy from 'rollup-plugin-copy'
 
 export default {
     // if you use createSpaConfig, you can use your index.html as entrypoint,
@@ -32,11 +31,14 @@ export default {
         nodeResolve(),
         commonjs({}),
         babel({ babelHelpers: 'bundled' }),
-        copy({
-            targets: [
-                { src: 'icons', dest: 'dist' } // Adjust paths as needed
-            ]
-        })
+        // Ships the marker icons next to the bundle. Plain cpSync rather than
+        // rollup-plugin-copy, whose globby -> braces chain has no patched release.
+        {
+            name: 'copy-icons',
+            writeBundle() {
+                cpSync('icons', 'dist/icons', { recursive: true })
+            }
+        }
     ]
 
     // alternatively, you can use your JS as entrypoint for rollup and

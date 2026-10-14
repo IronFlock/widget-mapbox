@@ -62,7 +62,6 @@
         "minimatch": "10.2.6",
         "prettier": "^3.5.3",
         "rollup": "^4.43.0",
-        "rollup-plugin-copy": "^3.5.0",
         "rollup-plugin-string": "^3.0.0",
         "tslib": "^2.8.1",
         "typescript": "5.8.3"
