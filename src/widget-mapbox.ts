@@ -559,7 +559,6 @@ export class WidgetMapbox extends LitElement {
     @property({ type: String }) accessToken?: string
 
     @state() private dataSets: DataSet[] = []
-    @state() private themeBgColor?: string
     @state() private themeTitleColor?: string
     @state() private themeSubtitleColor?: string
     /** Shown instead of the map when it cannot be created at all. */
@@ -685,7 +684,6 @@ export class WidgetMapbox extends LitElement {
     }
 
     registerTheme(theme?: Theme) {
-        this.themeBgColor = `var(--re-tile-background-color, ${theme?.theme_object?.backgroundColor || 'transparent'})`
         this.themeTitleColor = `var(--re-text-color, ${theme?.theme_object?.title?.textStyle?.color || 'inherit'})`
         this.themeSubtitleColor = `var(--re-text-color, ${theme?.theme_object?.title?.subtextStyle?.color || theme?.theme_object?.title?.textStyle?.color || 'inherit'})`
     }
@@ -1657,10 +1655,7 @@ export class WidgetMapbox extends LitElement {
         const showLegend = !!this.inputData?.showLegend && !noData
         const hasTitle = !!(this.inputData?.title || this.inputData?.subTitle)
         return html`
-            <div
-                class="wrapper"
-                style="background-color: ${this.themeBgColor}; color: ${this.themeTitleColor}"
-            >
+            <div class="wrapper" style="color: ${this.themeTitleColor}">
                 <header class="paging" ?active=${hasTitle || showLegend}>
                     <div class="title paging" ?active=${hasTitle}>
                         <h3 class="paging" ?active=${this.inputData?.title}>${this.inputData?.title}</h3>
