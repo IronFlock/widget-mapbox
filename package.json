@@ -3,7 +3,7 @@
     "description": "REWidget widget-mapbox",
     "license": "MIT",
     "author": "widget-mapbox",
-    "version": "1.5.22",
+    "version": "1.5.23",
     "engines": {
         "node": ">=24.9.0",
         "npm": ">=10.0.2"
