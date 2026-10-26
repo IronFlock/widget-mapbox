@@ -24,13 +24,7 @@
         "link": "npm link && cd ../RESWARM/frontend && npm link @ironflock/widget-mapbox",
         "unlink": "npm unlink --global && cd ../RESWARM/frontend && npm unlink @ironflock/widget-mapbox && npm i @ironflock/widget-mapbox",
         "types": "cat src/definition-schema.json | json2ts > src/definition-schema.d.ts",
-        "cors": "gcloud storage buckets update gs://reswarm-images --cors-file=src/cors-config.json",
-        "preversion": "sh scripts/release-preflight.sh",
-        "version": "npm run build",
-        "postversion": "git push --follow-tags && sh scripts/release-verify.sh",
-        "release": "npm version patch",
-        "release:minor": "npm version minor",
-        "release:major": "npm version major"
+        "cors": "gcloud storage buckets update gs://reswarm-images --cors-file=src/cors-config.json"
     },
     "dependencies": {
         "lit": "^3.3.3"
