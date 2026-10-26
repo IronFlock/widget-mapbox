@@ -1,0 +1,65 @@
+# Gate (the committed generated files are current, the widget build; no unit
+# tests) and workflow lint from the shared IronFlock CI harness.
+# Pull requests into main only: the ruleset lets nothing reach main without
+# ci-ok. The release intent decides whether the merge releases.
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  gate:
+    uses: IronFlock/workflows/.github/workflows/node-gate.yml@v1
+    with:
+      package-manager: npm
+      skip: unit
+
+  workflows:
+    uses: IronFlock/workflows/.github/workflows/workflows-lint.yml@v1
+
+  # The version decides: a bump makes a release PR (`just release-patch`,
+  # title `release widget-mapbox <version>`), an unchanged version a no-release PR
+  # (`just merge`) whose merge releases nothing. Tags are bare versions.
+  intent:
+    uses: IronFlock/workflows/.github/workflows/release-intent.yml@v1
+    with:
+      version-file: package.json
+      tag-prefix: ""
+
+  # Release pull requests only: build-publish.yml as a dry run (`npm publish
+  # --dry-run`, no tag), so a broken package never reaches main.
+  release-build:
+    needs: [intent]
+    if: needs.intent.outputs.kind == 'release'
+    uses: ./.github/workflows/build-publish.yml
+    permissions:
+      contents: read
+      id-token: write
+
+  # The required check of the main-branch ruleset: green only when every job
+  # above succeeded (skipped or cancelled counts as failed; release-build may be
+  # skipped, on a no-release pull request).
+  ci-ok:
+    if: ${{ always() }}
+    needs: [gate, workflows, intent, release-build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: all ci jobs succeeded
+        env:
+          REQUIRED: ${{ needs.gate.result }} ${{ needs.workflows.result }} ${{ needs.intent.result }}
+          RELEASE_BUILD: ${{ needs.release-build.result }}
+          KIND: ${{ needs.intent.outputs.kind }}
+        run: |
+          echo "required: $REQUIRED, release-build: $RELEASE_BUILD ($KIND)"
+          for r in $REQUIRED; do [ "$r" = success ] || exit 1; done
+          if [ "$KIND" = release ]; then [ "$RELEASE_BUILD" = success ]; else [ "$RELEASE_BUILD" = skipped ]; fi

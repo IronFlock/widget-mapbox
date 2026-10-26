@@ -33,7 +33,7 @@ Give the element a size (it fills its height, which must be definite), and set i
 npm start          # rollup watch + web-dev-server, opens demo/index.html
 npm run build      # dist/widget-mapbox.js
 npm run types      # regenerate src/definition-schema.d.ts after editing the schema
-npm run release    # patch release (see CLAUDE.md)
+just release-patch # release pull request (see CLAUDE.md)
 ```
 
 The demo loads the built bundle from `dist/`. Map tiles need a token that allows localhost: open `/demo/?token=<token>`.

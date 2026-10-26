@@ -1,62 +1,87 @@
-name: Build and Publish to npm and unpkg
+# Release: the merge of a release pull request (`just release-patch`: version
+# bump, title `release widget-mapbox <version>`) publishes the package to npm, then
+# sets the tag <version> (a bare version; a tag always means "on npm") and
+# creates the GitHub release, both with the release GitHub App's token. Main
+# accepts only pull requests whose required checks (ci-ok, security / report)
+# passed, so every release comes from a merged, fully green commit; nothing is
+# published or tagged from a laptop.
+# The file keeps its old name because npm's trusted publisher of the package
+# names it (IronFlock/widget-mapbox :: build-publish.yml).
+# A no-release merge starts nothing: `paths` holds only the version file, and
+# when a no-release pull request touches it anyway (a dependency) the jobs
+# below are skipped by its merge title, so no runner starts.
+# ci.yml calls it on release pull requests (workflow_call), and run by hand
+# (workflow_dispatch) it is a dry run: `npm publish --dry-run`, no tag.
+# A re-run is safe: a version already on npm is not published again.
+name: release
 
 on:
   push:
-    tags:
-      - "*"
+    branches: [main]
+    paths: [package.json]
+  workflow_call:
+  workflow_dispatch:
 
-# id-token lets the runner mint the OIDC token npm exchanges for publish rights.
-# Without it `npm publish` looks for a token and fails.
 permissions:
-  contents: write
-  id-token: write
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  build:
+  npm:
+    if: github.event_name != 'push' || startsWith(github.event.head_commit.message, 'release ')
     runs-on: ubuntu-latest
-
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      # the OIDC token npm exchanges for publish rights (trusted publishing,
+      # bound to this file)
+      id-token: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      # Pinned, not "24": npm trusted publishing needs npm >= 11.5.1, and the
-      # npm bundled with a Node line is not something we want floating.
-      - name: Install Node.js
-        uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # npm >= 11.5.1 for trusted publishing; Node 24.20.0 bundles npm 11.19.0.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24.20.0"
           registry-url: "https://registry.npmjs.org"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      # No .npmrc, no NPM_TOKEN. npm detects the OIDC environment and
-      # authenticates against the trusted publisher configured for this
-      # package (IronFlock/widget-mapbox :: build-publish.yml).
-      - name: Publish to npm
-        # Skips a version that is already on npm: the first @ironflock release of
-        # each widget was published by hand (npm only accepts a trusted publisher
-        # for an existing package), and its tag still runs this job.
+          # A publishing run never restores a cache another run could have written.
+          package-manager-cache: false
+      - run: npm ci
+      # Puts the version into the element name (widget-<name>-<version>).
+      - run: npm run build
+      # No .npmrc, no NPM_TOKEN: npm detects the OIDC environment and
+      # authenticates against the trusted publisher of this package.
+      - name: npm publish
+        env:
+          PUBLISH: ${{ github.event_name == 'push' }}
         run: |
-          name=$(node -p "require('./package.json').name")
-          version=$(node -p "require('./package.json').version")
-          if [ "$(npm view "$name@$version" version 2>/dev/null)" = "$version" ]; then
-            echo "$name@$version is already on npm, skipping publish"
+          name=$(jq -r .name package.json)
+          version=$(jq -r .version package.json)
+          if [ "$PUBLISH" != true ]; then
+            npm publish --access public --dry-run
+          elif [ "$(npm view "$name@$version" version 2>/dev/null)" = "$version" ]; then
+            echo "$name@$version is already on npm"
           else
             npm publish --access public
           fi
 
-      - name: Get the new version
-        id: get_version
-        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-
-      - name: Create GitHub Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create "${{ steps.get_version.outputs.version }}" \
-            --title "Release ${{ steps.get_version.outputs.version }}" \
-            --generate-notes
+  # The tag once the package is on npm, with the release GitHub App's token
+  # from the `release` environment (deployments from main only).
+  tag:
+    needs: [npm]
+    if: github.event_name == 'push' && startsWith(github.event.head_commit.message, 'release ')
+    uses: IronFlock/workflows/.github/workflows/release-tag.yml@v1
+    permissions:
+      contents: read
+    # The App key is a secret of the `release` environment; environment
+    # secrets reach a reusable workflow only through `secrets: inherit`.
+    secrets: inherit # zizmor: ignore[secrets-inherit]
+    with:
+      version-file: package.json
+      tag-prefix: ""
+      # The GitHub release of the tag, with the same App token.
+      github-release: true

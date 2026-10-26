@@ -1,0 +1,33 @@
+# Security screening from the shared IronFlock CI harness: secrets, npm
+# dependencies (osv-scanner on package-lock.json), semgrep, configuration and
+# licences.
+#
+# Report-only for now (fail-on empty): the report job lists every finding;
+# blocking follows once they are fixed. Accepted findings go into
+# .trivyignore.yaml / security/vex.openvex.json / .gitleaks.toml with a reason.
+name: security
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    # Mondays 12:31 UTC: catch CVEs disclosed against unchanged code.
+    - cron: "31 12 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  security:
+    uses: IronFlock/workflows/.github/workflows/security.yml@v1
+    permissions:
+      contents: read
+      security-events: write
+    with:
+      languages: node
+      fail-on: ""

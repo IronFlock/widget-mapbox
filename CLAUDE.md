@@ -8,7 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run watch` - Rollup watch mode (rebuild on change).
 - `npm start` - Runs `watch` and `@web/dev-server` concurrently; opens `demo/index.html` (served from repo root, see `web-dev-server.config.mjs`). The demo loads the built `dist/` bundle, and the built-in token only works on studio.ironflock.com: open `/demo/?token=<token>` with a token that allows localhost (e.g. studio's `.env.development` one) to see tiles.
 - `npm run types` - Regenerate `src/definition-schema.d.ts` from `src/definition-schema.json` (`json2ts`). Run after editing the schema.
-- `npm run release` — `npm version patch`: preflight guards (on `main`, clean tree, not behind `origin/main`, generated files current, build passes), then the bump and a `dist/` rebuild (the `version` hook, so the local build registers the new tag), then commit, bare-semver tag, `git push --follow-tags`, then waits on the CI run and fails if the npm publish fails. `npm run release:minor` / `release:major` for other bumps.
+- `just lint` — what the CI gate checks besides the build: regenerating the committed generated files (`npm run types`) changes nothing. `just build` = `npm run build`.
+- `just merge` / `just release-patch` (`release-minor`, `release-major`) — pull requests into `main` from a feature branch with everything committed: a no-release one, or a release one whose merge publishes to npm in CI (`.github/workflows/build-publish.yml`), then the release GitHub App tags the bare version and creates the GitHub release. Never `npm publish`, tag or edit the version by hand.
 - `npm run link` / `npm run unlink` - Link/unlink against a sibling `../RESWARM/frontend` checkout for in-app testing.
 - `npm run cors` - Updates GCS CORS for `gs://reswarm-images` (used to host the demo's `ObjectRandomizer.js`).
 
@@ -56,7 +57,7 @@ Single Rollup config (`rollup.config.js`): `replace` (version) -> `string` (CSS 
 
 ### Release flow
 
-`npm run release` bumps the patch version and pushes the tag; the empty tag prefix comes from `tag-version-prefix=""` in `.npmrc`. `.github/workflows/build-publish.yml` triggers on any tag push, runs `npm ci`, `npm run build`, then `npm publish --access public` via npm trusted publishing (OIDC — no `NPM_TOKEN`) and creates a GitHub Release. The bare numeric tag is what the workflow expects.
+Release on merge, through the shared IronFlock harness (IronFlock/workflows): `main` takes pull requests only, with green `ci-ok` and `security / report`. `just release-patch` bumps `package.json` and the lockfile and opens the release pull request `release widget-mapbox <version>`; its merge runs `.github/workflows/build-publish.yml` (the name stays because npm's trusted publisher names it): `npm ci`, build, `npm publish` via npm trusted publishing (OIDC, no `NPM_TOKEN`), then the release GitHub App sets the bare-version tag (`1.0.10`, no `v`) and creates the GitHub Release. `just merge` opens a pull request that releases nothing.
 
 ## `aiSelection` in `src/definition-schema.json`
 
