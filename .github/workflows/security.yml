@@ -2,9 +2,10 @@
 # dependencies (osv-scanner on package-lock.json), semgrep, configuration and
 # licences.
 #
-# Report-only for now (fail-on empty): the report job lists every finding;
-# blocking follows once they are fixed. Accepted findings go into
-# .trivyignore.yaml / security/vex.openvex.json / .gitleaks.toml with a reason.
+# Blocking: a secret, a critical or high vulnerability with a fix, a high
+# misconfiguration, a forbidden licence or a semgrep error fails the check.
+# Accepted findings go into .trivyignore.yaml / security/vex.openvex.json /
+# .gitleaks.toml with a reason and an expiry date.
 name: security
 
 on:
@@ -30,4 +31,4 @@ jobs:
       security-events: write
     with:
       languages: node
-      fail-on: ""
+      fail-on: secrets,vuln-critical,vuln-high,misconfig-high,license-forbidden,semgrep-error

@@ -51,6 +51,7 @@ type AppliedLayers = {
 // Fallback only: the IronFlock UI passes the token for its environment through `accessToken`.
 // This production token is URL-restricted to studio.ironflock.com.
 const DEFAULT_ACCESS_TOKEN =
+    // nosemgrep: generic.secrets.security.detected-jwt-token.detected-jwt-token -- a public Mapbox token (pk.), sent to every browser
     'pk.eyJ1IjoibWFya29wZSIsImEiOiJjbXB2Yjh2ankwMWUxMnNyM243aGFlNGxiIn0.BXax9rCajgo3Sn5MvAu7dQ'
 const DEFAULT_STYLE = 'light-v11'
 const LAYER_TYPES: LayerType[] = ['circle', 'symbol', 'heatmap', 'line']

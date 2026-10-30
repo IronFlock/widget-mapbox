@@ -79,7 +79,7 @@ jobs:
       contents: read
     # The App key is a secret of the `release` environment; environment
     # secrets reach a reusable workflow only through `secrets: inherit`.
-    secrets: inherit # zizmor: ignore[secrets-inherit]
+    secrets: inherit # zizmor: ignore[secrets-inherit] # nosemgrep: yaml.github-actions.security.secrets-inherit.secrets-inherit
     with:
       version-file: package.json
       tag-prefix: ""
