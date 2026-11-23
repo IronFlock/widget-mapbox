@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "enabledPlugins": {
+    "ironflock@ironflock": true,
+    "ironflock-dev@ironflock": true
+  },
+  "extraKnownMarketplaces": {
+    "ironflock": {
+      "source": {
+        "source": "github",
+        "repo": "IronFlock/agent-skills"
+      },
+      "autoUpdate": true
+    }
+  }
+}
