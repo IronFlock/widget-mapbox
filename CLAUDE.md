@@ -80,3 +80,5 @@ When maintaining it:
 - Prefer entries that discriminate against a *neighbouring* widget. Generic rejections are cheap; the ones that pay are those an author could plausibly get wrong.
 - The `notFor` lists are a set across all `widget-*` repos and are meant to be reciprocal — if this widget routes to another for some case, that widget should usually route back for the converse. Changing one side is a cue to check the other.
 - Update it whenever a property changes what this widget can *do*, not just how it looks.
+
+@AGENTS.md
