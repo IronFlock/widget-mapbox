@@ -1,0 +1,9 @@
+[marketplaces.ironflock]
+source_type = "git"
+source = "https://github.com/IronFlock/agent-skills.git"
+
+[plugins."ironflock@ironflock"]
+enabled = true
+
+[plugins."ironflock-dev@ironflock"]
+enabled = true
