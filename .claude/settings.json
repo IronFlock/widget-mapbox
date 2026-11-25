@@ -8,7 +8,7 @@
     "ironflock": {
       "source": {
         "source": "github",
-        "repo": "IronFlock/agent-skills"
+        "repo": "IronFlock/ai-plugins"
       },
       "autoUpdate": true
     }
