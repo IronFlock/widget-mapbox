@@ -87,7 +87,7 @@ The camera fits the data once, then on every update with `follow`, and on resize
 
 ### Build pipeline
 
-Single Rollup config (`rollup.config.js`): `replace` (version) -> `string` (CSS and SVG as strings) -> `typescript` -> `nodeResolve` -> `commonjs` -> `babel` (bundled helpers) -> `copy-schema-types`. Output is a single ESM bundle; `package.json` `main` points to `dist/widget-mapbox.js`, `types` to `dist/src/widget-mapbox.d.ts`. That declaration file imports `./definition-schema.js`, which tsc never emits for a hand-maintained `.d.ts`, so `copy-schema-types` copies `src/definition-schema.d.ts` next to it. The bundle includes `lit`, `mapbox-gl` and `tinycolor2`. `mapbox-gl` and `tinycolor2` are devDependencies; `lit` stays in `dependencies` only because the published typings import it.
+Single Rollup config (`rollup.config.js`): `replace` (version) -> `string` (CSS and SVG as strings) -> `typescript` -> `nodeResolve` -> `commonjs` -> `babel` (bundled helpers) -> `copy-schema-types`. Output is a single ESM bundle; `package.json` `main` points to `dist/widget-mapbox.js`, `types` to `dist/src/widget-mapbox.d.ts`. That declaration file imports `./definition-schema.js`, which tsc never emits for a hand-maintained `.d.ts`, so `copy-schema-types` copies `src/definition-schema.d.ts` next to it. The bundle includes `mapbox-gl` and `tinycolor2`, which are devDependencies. `lit` is external (`external: [/^lit/, /^@lit/]`): studio's import map provides one copy for all widgets, and it stays in `dependencies` because the published typings import it.
 
 ### Release flow
 
