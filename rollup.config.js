@@ -11,6 +11,8 @@ export default {
     // if you use createSpaConfig, you can use your index.html as entrypoint,
     // any <script type="module"> inside will be bundled by rollup
     input: ['./src/widget-mapbox.ts'],
+    // Lit comes from the host's import map, like every other widget's.
+    external: [/^lit/, /^@lit/],
     treeshake: {
         moduleSideEffects: false
     },
