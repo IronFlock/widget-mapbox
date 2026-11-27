@@ -44,14 +44,14 @@ and remaining work there when handing a task to another developer or agent.
 - `npm run types` - Regenerate `src/definition-schema.d.ts` from `src/definition-schema.json` (`json2ts`). Run after editing the schema.
 - `just lint` — what the CI gate checks besides the build: regenerating the committed generated files (`npm run types`) changes nothing. `just build` = `npm run build`.
 - `just merge` / `just release-patch` (`release-minor`, `release-major`) — pull requests into `main` from a feature branch with everything committed: a no-release one, or a release one whose merge publishes to npm in CI (`.github/workflows/build-publish.yml`), then the release GitHub App tags the bare version and creates the GitHub release. Never `npm publish`, tag or edit the version by hand.
-- `npm run link` / `npm run unlink` - Link/unlink against a sibling `../RESWARM/frontend` checkout for in-app testing.
+- `npm run link` / `npm run unlink` — Build and `npm link` this package into the studio checkout at `../../studio` (the host app, `~/git/ironflock/studio`), or put the published package back there. Only studio's appliance build (`build:appliance`) reads the widget from `node_modules`: its dev server (`npm run dev`) already aliases `widget-mapbox` to this checkout's `dist/` and serves its `src/*.json`, so `npm run watch` here is enough for dev. Studio tracks both `package-lock.json` and `bun.lock` (its Dockerfile runs `bun install --frozen-lockfile`), and `unlink` reinstalls with npm only: run `bun install` in studio as well if that moved the version.
 - `npm run cors` - Updates GCS CORS for `gs://reswarm-images` (used to host the demo's `ObjectRandomizer.js`).
 
 There is no test runner and no `lint` / `format` script in `package.json`. Node `>=24.9.0` is required.
 
 ## Architecture
 
-This repo produces a single LitElement web component published as `@ironflock/widget-mapbox`, consumed by the IronFlock/RESWARM dashboard platform.
+This repo produces a single LitElement web component published as `@ironflock/widget-mapbox`, consumed by IronFlock Studio, the board UI.
 
 ### Versioned custom element tag
 
